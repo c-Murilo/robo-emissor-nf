@@ -8,6 +8,7 @@ from typing import Callable
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -71,10 +72,8 @@ class NFSEBot:
             chrome_options.add_experimental_option("detach", True)
 
         # Usar ChromeDriver do Chromium instalado
-        self.driver = webdriver.Chrome(
-            executable_path="/usr/bin/chromedriver",
-            options=chrome_options
-        )
+        service = Service("/usr/bin/chromedriver")
+        self.driver = webdriver.Chrome(service=service, options=chrome_options)
         self.wait = WebDriverWait(self.driver, 30)
         self.driver.get(self.cfg["url"])
         self._log("Etapa 2: abriu URL do login.")
