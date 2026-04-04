@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -71,8 +72,8 @@ class NFSEBot:
         if self.cfg["detach"]:
             chrome_options.add_experimental_option("detach", True)
 
-        # Usar ChromeDriver do Chromium instalado
-        service = Service("/usr/bin/chromedriver")
+        # Usar ChromeDriver gerenciado automaticamente pelo webdriver-manager
+        service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
         self.wait = WebDriverWait(self.driver, 30)
         self.driver.get(self.cfg["url"])

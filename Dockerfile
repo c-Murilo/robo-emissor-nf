@@ -1,9 +1,8 @@
 FROM python:3.9-slim
 
-# Instalar Chrome, ChromeDriver e dependências de display
+# Instalar Chrome e dependências de display (webdriver-manager cuida do ChromeDriver)
 RUN apt-get update && apt-get install -y \
     chromium-browser \
-    chromium-driver \
     fonts-liberation \
     libappindicator1 \
     libappindicator3-1 \
