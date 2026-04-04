@@ -63,10 +63,18 @@ class NFSEBot:
         self._log("Etapa 1: iniciando Chrome.")
         chrome_options = Options()
         chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--headless=new")
         if self.cfg["detach"]:
             chrome_options.add_experimental_option("detach", True)
 
-        self.driver = webdriver.Chrome(options=chrome_options)
+        # Usar ChromeDriver do Chromium instalado
+        self.driver = webdriver.Chrome(
+            executable_path="/usr/bin/chromedriver",
+            options=chrome_options
+        )
         self.wait = WebDriverWait(self.driver, 30)
         self.driver.get(self.cfg["url"])
         self._log("Etapa 2: abriu URL do login.")
