@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emissor de Notas & Dashboard</title>
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-container: #ffffff;
+            --text-main: #333333;
+            --text-muted: #6c757d;
+            --border-color: #e9ecef;
+            --bg-dropzone: #f8f9fa;
+            --border-dropzone: #007bff;
+            --bg-dropzone-hover: #e2e6ea;
+            --bg-dropzone-success: #eafbf0;
+            --border-dropzone-success: #28a745;
+            --bg-kpi: #ffffff;
+            --bg-history: #fafafa;
+            --btn-bg: #007bff;
+            --btn-text: #ffffff;
+            --btn-hover: #0056b3;
+            --text-kpi-value: #212529;
+            --history-border: #dee2e6;
+            --toast-bg: #28a745;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121212;
+            --bg-container: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border-color: #333333;
+            --bg-dropzone: #2a2a2a;
+            --border-dropzone: #4dabf7;
+            --bg-dropzone-hover: #3a3a3a;
+            --bg-dropzone-success: #143320;
+            --border-dropzone-success: #40c057;
+            --bg-kpi: #252525;
+            --bg-history: #252525;
+            --btn-bg: #4dabf7;
+            --btn-text: #121212;
+            --btn-hover: #3bc9db;
+            --text-kpi-value: #ffffff;
+            --history-border: #444444;
+            --toast-bg: #40c057;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .main-container {
+            position: relative;
+            display: flex;
+            gap: 30px;
+            background: var(--bg-container);
+            padding: 40px 30px 30px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            width: 800px;
+            max-width: 95%;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            color: var(--text-main);
+            transition: transform 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .upload-box {
+            height: 180px;
+            border: 2px dashed var(--border-dropzone);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-dropzone);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .upload-box:hover,
+        .upload-box.dragover {
+            background-color: var(--bg-dropzone-hover);
+        }
+
+        .upload-box p {
+            margin: 10px 0 0 0;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .icon-file {
+            font-size: 32px;
+            color: #fd7e14;
+            pointer-events: none;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            height: 8px;
+            display: none;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--border-dropzone-success);
+            width: 0%;
+            transition: width 0.2s linear;
+        }
+
+        .btn-process {
+            padding: 14px;
+            font-size: 16px;
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-process:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .btn-process:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .kpi-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .kpi-card {
+            flex: 1;
+            background: var(--bg-kpi);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--border-dropzone);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .kpi-card.success {
+            border-left-color: var(--border-dropzone-success);
+        }
+
+        .kpi-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-card p {
+            margin: 0;
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--text-kpi-value);
+        }
+
+        .history-container {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            background: var(--bg-history);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--history-border);
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            background: var(--bg-dropzone-success);
+            color: var(--border-dropzone-success);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        #job-message {
+            font-size: 13px;
+            color: var(--text-muted);
+            min-height: 18px;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--toast-bg);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+            transform: translateX(150%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+        }
+
+        #toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <button class="theme-toggle" id="theme-btn" title="Alternar Tema">🌙</button>
+
+        <div class="col">
+            <h2>Envio de Planilha</h2>
+
+            <div class="upload-box" id="drop-zone">
+                <div class="icon-file">📊</div>
+                <p id="drop-text">Arraste CSV/XLS/XLSX aqui<br>ou clique para selecionar</p>
+                <input type="file" id="file-input" accept=".csv,.xls,.xlsx" style="display: none;">
+            </div>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <button class="btn-process" id="send-btn">Iniciar Lote</button>
+            <div id="job-message"></div>
+        </div>
+
+        <div class="col">
+            <h2>Visão Geral</h2>
+
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <h4>Notas na Fila</h4>
+                    <p id="queue-counter">0</p>
+                </div>
+                <div class="kpi-card success">
+                    <h4>Processadas</h4>
+                    <p id="invoice-counter">0</p>
+                </div>
+            </div>
+
+            <div class="history-container">
+                <h4 style="margin: 0 0 10px 0; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Últimos Processamentos</h4>
+                <ul class="history-list" id="history-list">
+                    <li style="color: var(--text-muted); font-size: 13px; text-align: center; padding-top: 20px;" id="empty-history">
+                        Nenhuma nota processada ainda.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">✅ Lote iniciado com sucesso!</div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const dropText = document.getElementById('drop-text');
+        const sendBtn = document.getElementById('send-btn');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const queueCounter = document.getElementById('queue-counter');
+        const invoiceCounter = document.getElementById('invoice-counter');
+        const historyList = document.getElementById('history-list');
+        const emptyHistory = document.getElementById('empty-history');
+        const toast = document.getElementById('toast');
+        const themeBtn = document.getElementById('theme-btn');
+        const jobMessage = document.getElementById('job-message');
+
+        let selectedFile = null;
+        let jobRunning = false;
+
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeBtn.textContent = '☀️';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            const theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeBtn.textContent = '🌙';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeBtn.textContent = '☀️';
+            }
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function isSpreadsheet(file) {
+            if (!file) return false;
+            const name = file.name.toLowerCase();
+            return name.endsWith('.csv') || name.endsWith('.xls') || name.endsWith('.xlsx');
+        }
+
+        function handleFile(file) {
+            if (isSpreadsheet(file)) {
+                selectedFile = file;
+                dropText.innerHTML = `<strong>Arquivo pronto:</strong><br>${file.name}`;
+                dropZone.style.borderColor = 'var(--border-dropzone-success)';
+                dropZone.style.backgroundColor = 'var(--bg-dropzone-success)';
+                queueCounter.textContent = '-';
+            } else {
+                alert('Selecione um arquivo CSV, XLS ou XLSX.');
+                resetDropZone();
+            }
+        }
+
+        function resetDropZone() {
+            selectedFile = null;
+            dropText.innerHTML = 'Arraste CSV/XLS/XLSX aqui<br>ou clique para selecionar';
+            dropZone.style.borderColor = '';
+            dropZone.style.backgroundColor = '';
+            fileInput.value = '';
+        }
+
+        function showToast(message) {
+            toast.textContent = `✅ ${message}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function renderHistory(history) {
+            if (!Array.isArray(history) || history.length === 0) {
+                historyList.innerHTML = `
+                    <li style="color: var(--text-muted); font-size: 13px; text-align: center; padding-top: 20px;" id="empty-history">
+                        Nenhuma nota processada ainda.
+                    </li>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = '';
+            history.forEach((item) => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.innerHTML = `
+                    <span>📄 ${item.file} <br><small style="color: var(--text-muted)">${item.time}</small></span>
+                    <span class="status-badge">${item.status}</span>
+                `;
+                historyList.appendChild(li);
+            });
+        }
+
+        function updateFromStatus(data) {
+            invoiceCounter.textContent = data.processed ?? 0;
+            queueCounter.textContent = data.queue ?? 0;
+            renderHistory(data.history || []);
+
+            const job = data.job || {};
+            const done = job.done ?? 0;
+            const total = job.total ?? 0;
+            const failed = job.failed ?? 0;
+            const message = job.message || '';
+
+            if (job.running) {
+                jobRunning = true;
+                sendBtn.disabled = true;
+                sendBtn.textContent = `Lote em execução (${done}/${total})`;
+                jobMessage.textContent = `${message} | Concluídas: ${done} | Falhas: ${failed}`;
+
+                progressContainer.style.display = 'block';
+                progressBar.style.width = total > 0 ? `${Math.min((done / total) * 100, 100)}%` : '10%';
+            } else {
+                if (jobRunning) {
+                    showToast('Lote finalizado');
+                }
+                jobRunning = false;
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Iniciar Lote';
+                jobMessage.textContent = message;
+
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        async function carregarStatus() {
+            try {
+                const response = await fetch('/status');
+                if (!response.ok) return;
+                const data = await response.json();
+                updateFromStatus(data);
+            } catch (error) {
+                console.error('Erro ao buscar status:', error);
+            }
+        }
+
+        sendBtn.addEventListener('click', async () => {
+            if (!selectedFile) {
+                alert('Selecione uma planilha primeiro.');
+                return;
+            }
+
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Enviando...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Erro ao iniciar lote.');
+                }
+
+                showToast(data.message || 'Lote iniciado com sucesso.');
+                resetDropZone();
+                await carregarStatus();
+            } catch (error) {
+                alert(error.message);
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Iniciar Lote';
+            }
+        });
+
+        carregarStatus();
+        setInterval(carregarStatus, 5000);
+    </script>
+</body>
+</html>
