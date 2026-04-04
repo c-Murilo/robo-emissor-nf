@@ -192,7 +192,7 @@ def _job_snapshot() -> dict:
     return {
         "running": stats["job_running"],
         "total": stats["job_total"],
-        "donez": stats["job_done"],
+        "done": stats["job_done"],
         "failed": stats["job_failed"],
         "message": stats["job_message"],
     }
@@ -265,5 +265,4 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
     debug_mode = os.getenv("FLASK_ENV") == "development"
     host = "0.0.0.0"  # Render requer 0.0.0.0, não 127.0.0.1
-    app.run(debug=debug_mode, host=host, port=port, use_reloader=False)
     app.run(debug=debug_mode, host=host, port=port, use_reloader=False)
