@@ -1,26 +1,33 @@
 FROM python:3.9-slim
 
-# Instalar Chrome e dependências de display (webdriver-manager cuida do ChromeDriver)
-RUN apt-get update && apt-get install -y \
+# Instalar Chrome, ChromeDriver e ALL dependências de display
+RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium-browser \
+    chromium-driver \
+    ca-certificates \
+    fonts-dejavu-core \
     fonts-liberation \
     libappindicator1 \
     libappindicator3-1 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libatspi2.0-0 \
+    libc6 \
     libcairo2 \
+    libcurl4 \
     libcups2 \
     libdbus-1-3 \
     libexpat1 \
     libfontconfig1 \
     libfreetype6 \
     libgbm1 \
+    libgcc1 \
     libglib2.0-0 \
     libgtk-3-0 \
     libgtk-3-common \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
+    libstdc++6 \
     libx11-6 \
     libx11-xcb1 \
     libxcb1 \
@@ -35,7 +42,10 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxss1 \
     libxtst6 \
+    nspr \
+    nss \
     xdg-utils \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Definir working directory

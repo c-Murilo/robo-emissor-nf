@@ -72,9 +72,17 @@ class NFSEBot:
         if self.cfg["detach"]:
             chrome_options.add_experimental_option("detach", True)
 
-        # Usar ChromeDriver gerenciado automaticamente pelo webdriver-manager
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        # Tentar usar ChromeDriver do sistema primeiro (Docker/Linux)
+        # Se não existir, usar webdriver-manager
+        try:
+            service = Service("/usr/bin/chromedriver")
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        except Exception:
+            # Fallback para webdriver-manager
+            self._log("ChromeDriver do sistema não encontrado, usando webdriver-manager...")
+            service = Service(ChromeDriverManager().install())
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        
         self.wait = WebDriverWait(self.driver, 30)
         self.driver.get(self.cfg["url"])
         self._log("Etapa 2: abriu URL do login.")
@@ -612,8 +620,7 @@ def emitir_lote_nfse(
             if idx < total and cfg["intervalo_segundos"] > 0:
                 print(f"⏳ Aguardando {cfg['intervalo_segundos']} segundos antes do próximo cliente...")
                 logs.append(f"⏳ Aguardando {cfg['intervalo_segundos']} segundos")
-                # time.sleep(cfg["intervalo_segundos"])  # DESABILITADO PARA TESTES
-                time.sleep(3)  # Apenas 3 segundos para testes
+                time.sleep(cfg["intervalo_segundos"])
                 print(f"✓ Intervalo finalizado, iniciando próximo cliente...")
                 logs.append(f"✓ Iniciando próximo cliente...")
 
